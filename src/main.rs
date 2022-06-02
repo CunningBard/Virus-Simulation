@@ -1,3 +1,4 @@
+use std::time::SystemTime;
 use rand::thread_rng;
 use rand::Rng;
 use rand::seq::SliceRandom;
@@ -55,6 +56,7 @@ struct Person
     is_infected: bool,
     is_recovered: bool,
     is_quarantined: bool,
+    days_since_infected: i32,
     virus: Virus
 }
 
@@ -68,6 +70,7 @@ impl Person
             is_infected: false,
             is_recovered: false,
             is_quarantined: false,
+            days_since_infected: 0,
             virus: Virus {r_naught: 0, life_span: 0}
         }
     }
@@ -76,7 +79,7 @@ impl Person
         self.virus = virus;
     }
     fn recover(&mut self) {
-        assert!(!self.is_infected, "how the fuck can an non infected recover");
+        assert!(self.is_infected, "how the fuck can an non infected recover");
 
         self.is_infected = false;
         self.is_recovered = true;
@@ -84,10 +87,18 @@ impl Person
 
     fn get_infection_chance(&self) -> i32 {
         if self.is_infected {
-            let infection_chance = (self.virus.r_naught * 100 / self.virus.life_span * 100) / 2;
+            let infection_chance = (((self.virus.r_naught as f32 /(self.virus.life_span as f32)) / 2 as f32) * 100 as f32) as i32;
             return infection_chance
         }
         0
+    }
+
+    fn handle(&mut self)
+    {
+        self.days_since_infected += 1;
+        if self.days_since_infected > self.virus.life_span {
+            self.recover()
+        }
     }
 
     fn go_to_mall(&self) -> bool
@@ -122,11 +133,15 @@ impl Building
             }
         }
 
-        &self.people_inside[rand_range(0, non_infected.len() as i32) as usize].infect(virus);
+        if !non_infected.is_empty(){
+            &self.people_inside[rand_range(0, non_infected.len() as i32) as usize].infect(virus);
+        }
     }
 
-    fn infect(&self)
+    fn infect(&mut self)
     {
+        let mut times_to_infect = 0;
+        let mut current_virus = Virus{ r_naught: 0, life_span: 0 };
         let mut can_be_infected = 0;
         for person_ in &self.people_inside {
             if !person_.is_infected && !person_.is_recovered {
@@ -138,21 +153,31 @@ impl Building
                 break
             }
 
-            if person.is_infected{
+            if person.is_infected {
+                current_virus = person.virus.clone();
                 let mut chance = person.get_infection_chance();
                 while chance > 100 {
                     chance -= 100;
+                    times_to_infect += 1;
+                }
+                if rand_prob(chance){
+                    times_to_infect += 1;
                 }
             }
         }
+        for _ in 0..times_to_infect
+        {
+            self.infect_random(current_virus);
+        }
     }
 }
+
 
 fn main()  {
     // init
     let mut houses: Vec<Building> = vec![];
     let mut malls: Vec<Building> = vec![];
-    let mut remain = 5;
+    let mut remain = 1000;
     let mut days = 0;
 
     let mut house_id = 0;
@@ -164,7 +189,7 @@ fn main()  {
     let mut pop_recovered = 0;
     let mut threshold = 5;
 
-    let virus = Virus{ r_naught: 5, life_span: 16 };
+    let virus = Virus{ r_naught: 2, life_span: 16 };
 
     for i in 1..11 {
         malls.push(Building{id: i, capacity: 100, people_inside: vec![]})
@@ -188,7 +213,9 @@ fn main()  {
     }
     vec_shuffle(&mut houses);
 
-    // houses[0].people_inside[0].infect(virus.clone());
+    for i in 0..5 {
+        houses[i].people_inside[0].infect(virus.clone());
+    }
     // end init
 
     println!("{:?}", &houses[0]);
@@ -204,7 +231,7 @@ fn main()  {
                 population += 1;
                 if person.is_infected {
                     pop_infected += 1;
-                } else if person.is_infected {
+                } else if person.is_recovered {
                     pop_recovered += 1;
                 } else {
                     pop_healthy += 1;
@@ -216,6 +243,14 @@ fn main()  {
         }
         println!("Day: {}\nPopulation: {}\nHealthy: {}\nInfected: {} \nRecovered: {}\n", days, population, pop_healthy, pop_infected, pop_recovered);
         // ready
+
+        let mut new_houses = vec![];
+        for mut house in houses {
+            house.infect();
+            new_houses.push(house);
+        }
+        houses = new_houses;
+
         houses = houses.into_iter().map(|house| {
             Building {
                 id: house.id,
@@ -223,7 +258,10 @@ fn main()  {
                 people_inside: house
                     .people_inside
                     .into_iter()
-                    .filter_map(|pers| {
+                    .filter_map(|mut pers| {
+                        if pers.is_infected {
+                            pers.handle();
+                        }
                         if pers.go_to_mall() {
                             let mut temp = rand_number_increase_prob(100,20) as usize;
                             if temp > malls.len(){
@@ -238,6 +276,14 @@ fn main()  {
                     .collect()
             }
         }).collect();
+
+
+        let mut new_malls = vec![];
+        for mut mall in malls {
+            mall.infect();
+            new_malls.push(mall);
+        }
+        malls = new_malls;
 
         malls = malls.into_iter().map(|mall| {
             Building {
