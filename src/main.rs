@@ -131,9 +131,20 @@ impl Building
 }
 
 fn main()  {
+    // init
     let mut houses: Vec<Building> = vec![];
     let mut remain = 100;
+    let mut days = 0;
     let mut ids = 0;
+
+    let mut population = 0;
+    let mut pop_infected = 0;
+    let mut pop_healthy = 0;
+    let mut pop_recovered = 0;
+    let mut threshold = 5;
+
+    let virus = Virus{ r_naught: 5, life_span: 16 };
+
     while remain > 0
     {
         let mut res_prob = rand_number_increase_prob(100, 10);
@@ -149,9 +160,32 @@ fn main()  {
         houses.push(new_house);
     }
     vec_shuffle(&mut houses);
-    let virus = Virus{ r_naught: 5, life_span: 16 };
-    houses[0].people_inside[0].infect(virus.clone());
-    for house in &houses {
-        println!("{:?}", house);
+
+    // houses[0].people_inside[0].infect(virus.clone());
+    // end init
+
+    while threshold > 0 {
+        days += 1;
+        threshold -= 1;
+        population = 0;
+        pop_infected = 0;
+        pop_healthy = 0;
+        pop_recovered = 0;
+        for house in &houses {
+            for person in &house.people_inside {
+                population += 1;
+                if person.is_infected {
+                    pop_infected += 1;
+                } else if person.is_infected {
+                    pop_recovered += 1;
+                } else {
+                    pop_healthy += 1;
+                }
+            }
+        }
+        if pop_infected > 0 {
+            threshold = 5;
+        }
+        println!("Day: {}\nPopulation: {}\nHealthy: {}\nInfected: {} \nRecovered: {}\n", days, population, pop_healthy, pop_infected, pop_recovered)
     }
 }
