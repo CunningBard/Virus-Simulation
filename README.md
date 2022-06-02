@@ -4,6 +4,10 @@ A simulation that will simulate how a virus will spread though out the populatio
 ```
 python3 with matplotlib
 rust
+
+# using
+rust = "1.61.0"
+python = "3.10"
 ```
 # Road Map
 - make transfer to house to mall and vice verse work
