@@ -51,6 +51,7 @@ struct Virus
 struct Person
 {
     id: i32,
+    house_id: i32,
     is_infected: bool,
     is_recovered: bool,
     is_quarantined: bool,
@@ -59,10 +60,11 @@ struct Person
 
 impl Person
 {
-    fn person(id: i32) -> Person {
+    fn person(id: i32, house_id: i32) -> Person {
         Person
         {
             id,
+            house_id,
             is_infected: false,
             is_recovered: false,
             is_quarantined: false,
@@ -98,6 +100,7 @@ impl Person
 #[derive(Debug, Clone)]
 struct Building
 {
+    id: i32,
     capacity: i32,           
     people_inside: Vec<Person>,
 }
@@ -109,8 +112,17 @@ impl Building
         self.people_inside.push(person);
     }
 
-    fn infect_random(&mut self) {
+    fn infect_random(&mut self, virus: Virus) {
+        let mut non_infected = vec![];
+        let mut ind = -1;
+        for person in &self.people_inside {
+            ind += 1;
+            if !person.is_infected && !person.is_recovered {
+                non_infected.push(ind)
+            }
+        }
 
+        &self.people_inside[rand_range(0, non_infected.len() as i32) as usize].infect(virus);
     }
 
     fn infect(&self)
@@ -154,22 +166,23 @@ fn main()  {
 
     let virus = Virus{ r_naught: 5, life_span: 16 };
 
-    for i in 0..10 {
-        malls.push(Building{capacity: 100, people_inside: vec![]})
+    for i in 1..11 {
+        malls.push(Building{id: i, capacity: 100, people_inside: vec![]})
     }
 
     while remain > 0
     {
+        house_id += 1;
         // let mut res_prob = rand_number_increase_prob(100, 10);
         let mut res_prob = 5;
         if res_prob > remain { res_prob = remain }
 
-        let mut new_house = Building { people_inside: vec![], capacity: res_prob };
+        let mut new_house = Building {id: house_id, people_inside: vec![], capacity: res_prob };
         remain -= res_prob;
 
         for _i in 1..(res_prob + 1) {
             ids += 1;
-            new_house.add(Person::person(ids));
+            new_house.add(Person::person(ids, house_id));
         }
         houses.push(new_house);
     }
@@ -205,13 +218,18 @@ fn main()  {
         // ready
         houses = houses.into_iter().map(|house| {
             Building {
+                id: house.id,
                 capacity: house.capacity,
                 people_inside: house
                     .people_inside
                     .into_iter()
                     .filter_map(|pers| {
                         if pers.go_to_mall() {
-                            malls[rand_number_increase_prob(100,20) as usize].people_inside.push(pers);
+                            let mut temp = rand_number_increase_prob(100,20) as usize;
+                            if temp > malls.len(){
+                                temp = malls.len() - 1;
+                            }
+                            malls[temp].people_inside.push(pers);
                             None
                         } else {
                             Some(pers)
