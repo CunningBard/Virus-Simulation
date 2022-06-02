@@ -192,7 +192,7 @@ fn main()  {
 
     let mut data: Vec<Vec<i32>> = vec![];
 
-    let virus = Virus{ r_naught: 2, life_span: 60 };
+    let virus = Virus{ r_naught: 2, life_span: 40 };
 
     for i in 1..11 {
         malls.push(Building{id: i, capacity: 100, people_inside: vec![]})
