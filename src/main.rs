@@ -1,3 +1,4 @@
+use std::fs;
 use std::time::SystemTime;
 use rand::thread_rng;
 use rand::Rng;
@@ -189,7 +190,9 @@ fn main()  {
     let mut pop_recovered = 0;
     let mut threshold = 5;
 
-    let virus = Virus{ r_naught: 2, life_span: 16 };
+    let mut data: Vec<Vec<i32>> = vec![];
+
+    let virus = Virus{ r_naught: 2, life_span: 60 };
 
     for i in 1..11 {
         malls.push(Building{id: i, capacity: 100, people_inside: vec![]})
@@ -241,6 +244,7 @@ fn main()  {
         if pop_infected > 0 {
             threshold = 5;
         }
+        data.push(vec![population, pop_healthy, pop_infected, pop_recovered]);
         println!("Day: {}\nPopulation: {}\nHealthy: {}\nInfected: {} \nRecovered: {}\n", days, population, pop_healthy, pop_infected, pop_recovered);
         // ready
 
@@ -308,4 +312,12 @@ fn main()  {
             }
         }).collect();
     }
+    let mut s = "".to_string();
+    for ve in data {
+        for v in ve {
+            s += &format!("{} ", v);
+        }
+        s += "\n";
+    }
+    fs::write("out/data.txt", s);
 }
