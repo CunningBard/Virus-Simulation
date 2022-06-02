@@ -13,4 +13,4 @@ python = "3.10"
 - make transfer to house to mall and vice verse work
 - make a system for quarantines and lockdowns
 - make a system for particles that stay in malls (will infect people)
-- 
+- revise the going to mall system

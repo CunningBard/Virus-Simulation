@@ -47,7 +47,7 @@ struct Virus
     life_span: i32,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Person
 {
     id: i32,
@@ -87,9 +87,15 @@ impl Person
         }
         0
     }
+
+    fn go_to_mall(&self) -> bool
+    {
+        true
+    }
+
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Building
 {
     capacity: i32,           
@@ -133,8 +139,11 @@ impl Building
 fn main()  {
     // init
     let mut houses: Vec<Building> = vec![];
-    let mut remain = 100;
+    let mut malls: Vec<Building> = vec![];
+    let mut remain = 5;
     let mut days = 0;
+
+    let mut house_id = 0;
     let mut ids = 0;
 
     let mut population = 0;
@@ -145,9 +154,14 @@ fn main()  {
 
     let virus = Virus{ r_naught: 5, life_span: 16 };
 
+    for i in 0..10 {
+        malls.push(Building{capacity: 100, people_inside: vec![]})
+    }
+
     while remain > 0
     {
-        let mut res_prob = rand_number_increase_prob(100, 10);
+        // let mut res_prob = rand_number_increase_prob(100, 10);
+        let mut res_prob = 5;
         if res_prob > remain { res_prob = remain }
 
         let mut new_house = Building { people_inside: vec![], capacity: res_prob };
@@ -164,6 +178,7 @@ fn main()  {
     // houses[0].people_inside[0].infect(virus.clone());
     // end init
 
+    println!("{:?}", &houses[0]);
     while threshold > 0 {
         days += 1;
         threshold -= 1;
@@ -186,6 +201,25 @@ fn main()  {
         if pop_infected > 0 {
             threshold = 5;
         }
-        println!("Day: {}\nPopulation: {}\nHealthy: {}\nInfected: {} \nRecovered: {}\n", days, population, pop_healthy, pop_infected, pop_recovered)
+        println!("Day: {}\nPopulation: {}\nHealthy: {}\nInfected: {} \nRecovered: {}\n", days, population, pop_healthy, pop_infected, pop_recovered);
+        // ready
+        houses = houses.into_iter().map(|house| {
+            Building {
+                capacity: house.capacity,
+                people_inside: house
+                    .people_inside
+                    .into_iter()
+                    .filter_map(|pers| {
+                        if pers.go_to_mall() {
+                            malls[rand_number_increase_prob(100,20) as usize].people_inside.push(pers);
+                            None
+                        } else {
+                            Some(pers)
+                        }
+                    })
+                    .collect()
+            }
+        }).collect();
+
     }
 }
