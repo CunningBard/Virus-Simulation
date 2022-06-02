@@ -134,7 +134,7 @@ impl Building
         }
 
         if !non_infected.is_empty(){
-            &self.people_inside[rand_range(0, non_infected.len() as i32) as usize].infect(virus);
+            &self.people_inside[non_infected[rand_range(0, non_infected.len() as i32) as usize] as usize].infect(virus);
         }
     }
 
@@ -177,7 +177,7 @@ fn main()  {
     // init
     let mut houses: Vec<Building> = vec![];
     let mut malls: Vec<Building> = vec![];
-    let mut remain = 1000;
+    let mut remain = 10000;
     let mut days = 0;
 
     let mut house_id = 0;
