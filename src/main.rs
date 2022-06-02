@@ -40,14 +40,14 @@ fn rand_number_increase_prob(mut start_prob: i32, minus_per_iteration: i32) -> i
     num
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 struct Virus
 {
     r_naught: i32,
     life_span: i32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 struct Person
 {
     id: i32,
@@ -199,7 +199,7 @@ fn main()  {
         pop_infected = 0;
         pop_healthy = 0;
         pop_recovered = 0;
-        for house in &houses {
+        for house in houses.clone() {
             for person in &house.people_inside {
                 population += 1;
                 if person.is_infected {
@@ -239,5 +239,27 @@ fn main()  {
             }
         }).collect();
 
+        malls = malls.into_iter().map(|mall| {
+            Building {
+                id: mall.id,
+                capacity: mall.capacity,
+                people_inside: mall
+                    .people_inside
+                    .into_iter()
+                    .filter_map(|pers| {
+                        let mut ind = -1;
+                        for house in &houses {
+                            ind += 1;
+                            if pers.house_id == house.id
+                            {
+                                break;
+                            }
+                        }
+                        houses[ind as usize].people_inside.push(pers);
+                        None
+                    })
+                    .collect()
+            }
+        }).collect();
     }
 }
