@@ -89,7 +89,8 @@ impl Person
 
     fn get_infection_chance(&self) -> i32 {
         if self.is_infected {
-            let infection_chance = (((self.virus.r_naught as f32 /(self.virus.life_span as f32)) / 2 as f32) * 100 as f32) as i32;
+            let infection_chance = ((self.virus.r_naught as f32 /(self.virus.life_span as f32)) * 100 as f32) as i32;
+            println!("{}", infection_chance);
             return infection_chance
         }
         0
@@ -105,7 +106,11 @@ impl Person
 
     fn go_to_mall(&self) -> bool
     {
-        true
+        if self.is_quarantined {
+            false
+        } else {
+            true
+        }
     }
 
 }
@@ -155,7 +160,7 @@ impl Building
                 break
             }
 
-            if person.is_infected {
+            if person.is_infected && !person.is_quarantined {
                 current_virus = person.virus.clone();
                 let mut chance = person.get_infection_chance();
                 while chance > 100 {
@@ -265,12 +270,9 @@ fn main()  {
         println!("Day: {}\nPopulation: {}\nHealthy: {}\nInfected: {} \nRecovered: {}\n", days, population, pop_healthy, pop_infected, pop_recovered);
         // ready
 
-        let mut new_houses = vec![];
-        for mut house in houses {
-            house.infect();
-            new_houses.push(house);
-        }
-        houses = new_houses;
+        // for house in &mut houses {
+        //     house.infect();
+        // }
 
         houses = houses.into_iter().map(|house| {
             Building {
@@ -298,13 +300,9 @@ fn main()  {
             }
         }).collect();
 
-
-        let mut new_malls = vec![];
-        for mut mall in malls {
+        for mut mall in &mut malls {
             mall.infect();
-            new_malls.push(mall);
         }
-        malls = new_malls;
 
         malls = malls.into_iter().map(|mall| {
             Building {
@@ -336,5 +334,5 @@ fn main()  {
         }
         s += "\n";
     }
-    fs::write("out/data.txt", s);
+    fs::write("out/data.txt", s).expect("WARNING: FAILED TO WRITE");
 }
