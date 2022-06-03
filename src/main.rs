@@ -232,7 +232,6 @@ fn main()  {
         }
         houses.push(new_house);
     }
-    vec_shuffle(&mut houses);
 
     for i in 0..10 {
         houses[i].people_inside[0].infect(virus.clone());
@@ -307,15 +306,7 @@ fn main()  {
                     .people_inside
                     .into_iter()
                     .filter_map(|pers| {
-                        let mut ind: i32 = -1;
-                        for house in &houses {
-                            ind += 1;
-                            if pers.house_id == house.id
-                            {
-                                break;
-                            }
-                        }
-                        houses[ind as usize].people_inside.push(pers);
+                        houses[(pers.house_id - 1) as usize].people_inside.push(pers);
                         None
                     })
                     .collect()

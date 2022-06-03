@@ -2,7 +2,7 @@ import subprocess
 import matplotlib.pyplot as plt
 
 
-subprocess.run(["./target/release/VirusThing", "10000", "3", "19"])
+subprocess.run(["./target/release/VirusThing", "10000", "10", "20"])
 
 
 days = []
