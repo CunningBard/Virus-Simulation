@@ -360,7 +360,7 @@ def main():
     #       virus = Virus(float(daysTilRecovery), float(RNaught), float(severity), True)
     #   else:
     #       virus = Virus(14, 2.5, 5, True)
-    virus = Virus(14, 2.5, 5, False)
+    virus = Virus(14, 2.5, 5, True)
     a = random.choice(list(people))
     people[a].GetInfected(virus)
     target_turn = 0

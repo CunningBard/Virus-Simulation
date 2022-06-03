@@ -46,7 +46,7 @@ fn rand_number_increase_prob(mut start_prob: i32, minus_per_iteration: i32) -> i
 #[derive(Debug, Clone, Copy)]
 struct Virus
 {
-    r_naught: i32,
+    infection_chance: i32,
     life_span: i32,
 }
 
@@ -59,6 +59,7 @@ struct Person
     is_recovered: bool,
     is_quarantined: bool,
     days_since_infected: i32,
+    num_infected_people: i32,
     virus: Virus
 }
 
@@ -73,7 +74,8 @@ impl Person
             is_recovered: false,
             is_quarantined: false,
             days_since_infected: 0,
-            virus: Virus {r_naught: 0, life_span: 0}
+            num_infected_people: 0,
+            virus: Virus {infection_chance: 0, life_span: 0}
         }
     }
     fn infect(&mut self, virus: Virus) {
@@ -85,15 +87,6 @@ impl Person
 
         self.is_infected = false;
         self.is_recovered = true;
-    }
-
-    fn get_infection_chance(&self) -> i32 {
-        if self.is_infected {
-            let infection_chance = ((self.virus.r_naught as f32 /(self.virus.life_span as f32)) * 100 as f32) as i32;
-            println!("{}", infection_chance);
-            return infection_chance
-        }
-        0
     }
 
     fn handle(&mut self)
@@ -148,27 +141,29 @@ impl Building
     fn infect(&mut self)
     {
         let mut times_to_infect = 0;
-        let mut current_virus = Virus{ r_naught: 0, life_span: 0 };
+        let mut current_virus = Virus{ infection_chance: 0, life_span: 0 };
         let mut can_be_infected = 0;
         for person_ in &self.people_inside {
             if !person_.is_infected && !person_.is_recovered {
                 can_be_infected += 1;
             }
         }
-        for person in &self.people_inside {
+        for person in &mut self.people_inside {
             if can_be_infected < 1 {
                 break
             }
 
             if person.is_infected && !person.is_quarantined {
                 current_virus = person.virus.clone();
-                let mut chance = person.get_infection_chance();
+                let mut chance = current_virus.infection_chance;
                 while chance > 100 {
                     chance -= 100;
                     times_to_infect += 1;
+                    person.num_infected_people += 1;
                 }
                 if rand_prob(chance){
                     times_to_infect += 1;
+                    person.num_infected_people += 1;
                 }
             }
         }
@@ -206,12 +201,12 @@ fn main()  {
 
     let mut data: Vec<Vec<i32>> = vec![];
 
-    let mut virus = Virus{ r_naught: 2, life_span: 40 };
+    let mut virus = Virus{ infection_chance: 1, life_span: 40 };
 
     if has_args {
         remain = args[1].parse::<i32>().unwrap();
         virus = Virus {
-            r_naught: args[2].parse::<i32>().unwrap(),
+            infection_chance: args[2].parse::<i32>().unwrap(),
             life_span: args[3].parse::<i32>().unwrap()
         };
     }
@@ -239,7 +234,7 @@ fn main()  {
     }
     vec_shuffle(&mut houses);
 
-    for i in 0..5 {
+    for i in 0..10 {
         houses[i].people_inside[0].infect(virus.clone());
     }
     // end init
@@ -270,9 +265,9 @@ fn main()  {
         println!("Day: {}\nPopulation: {}\nHealthy: {}\nInfected: {} \nRecovered: {}\n", days, population, pop_healthy, pop_infected, pop_recovered);
         // ready
 
-        // for house in &mut houses {
-        //     house.infect();
-        // }
+        for house in &mut houses {
+            house.infect();
+        }
 
         houses = houses.into_iter().map(|house| {
             Building {
@@ -326,6 +321,14 @@ fn main()  {
                     .collect()
             }
         }).collect();
+    }
+    let mut num_infected = 0;
+    for house in houses.clone() {
+        for person in &house.people_inside {
+            if person.is_infected {
+                num_infected += 1;
+            }
+        }
     }
     let mut s = "".to_string();
     for ve in data {
