@@ -2,8 +2,8 @@ import subprocess
 import matplotlib.pyplot as plt
 
 
-
 subprocess.run(["./target/release/VirusThing", "1000", "2", "14"])
+
 
 days = []
 population = []
