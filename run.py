@@ -1,6 +1,6 @@
 import subprocess
-
 import matplotlib.pyplot as plt
+
 
 
 subprocess.run(["./target/release/VirusThing", "1000", "2", "14"])
@@ -11,10 +11,10 @@ healthy = []
 infected = []
 recovered = []
 with open("out/data.txt", "r") as f:
-    a = f.readlines()
+    data = f.readlines()
 
 day = 1
-for line in a:
+for line in data:
     line.replace("\n", "")
     line = line.split(" ")
     day += 1
@@ -25,13 +25,6 @@ for line in a:
     recovered.append(int(line[3]))
 
 
-# Create data
-x=range(1,6)
-y1=[1,4,6,8,9]
-y2=[2,2,7,10,12]
-y3=[2,8,5,10,6]
-
-# Basic stacked area chart.
 plt.stackplot(days, infected, recovered, healthy, labels=['Infected', 'Recovered', 'Healthy'])
 plt.legend(loc='upper left')
 plt.show()
