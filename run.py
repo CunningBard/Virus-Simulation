@@ -3,7 +3,7 @@ import subprocess
 import matplotlib.pyplot as plt
 
 
-subprocess.run("./target/release/VirusThing")
+subprocess.run(["./target/release/VirusThing", "1000", "2", "14"])
 
 days = []
 population = []
@@ -32,6 +32,6 @@ y2=[2,2,7,10,12]
 y3=[2,8,5,10,6]
 
 # Basic stacked area chart.
-plt.stackplot(days, healthy, infected, recovered, labels=['Healthy', 'Infected', 'Recovered'])
+plt.stackplot(days, infected, recovered, healthy, labels=['Infected', 'Recovered', 'Healthy'])
 plt.legend(loc='upper left')
 plt.show()

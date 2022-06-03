@@ -2,6 +2,7 @@ use std::fs;
 use std::time::SystemTime;
 use rand::thread_rng;
 use rand::Rng;
+use std::env;
 use rand::seq::SliceRandom;
 
 
@@ -176,6 +177,14 @@ impl Building
 
 fn main()  {
     // init
+    let mut has_args = false;
+    let args: Vec<_> = env::args().collect();
+    if args.len() > 1 {
+        assert_eq!(args.len(), 4, "args is not of length 3");
+        has_args = true;
+    }
+
+
     let mut houses: Vec<Building> = vec![];
     let mut malls: Vec<Building> = vec![];
     let mut remain = 10000;
@@ -192,7 +201,16 @@ fn main()  {
 
     let mut data: Vec<Vec<i32>> = vec![];
 
-    let virus = Virus{ r_naught: 2, life_span: 40 };
+    let mut virus = Virus{ r_naught: 2, life_span: 40 };
+
+    if has_args {
+        remain = args[1].parse::<i32>().unwrap();
+        virus = Virus {
+            r_naught: args[2].parse::<i32>().unwrap(),
+            life_span: args[3].parse::<i32>().unwrap()
+        };
+    }
+    println!("Population: {}\nVirus: {:?}\n", remain, virus);
 
     for i in 1..11 {
         malls.push(Building{id: i, capacity: 100, people_inside: vec![]})
@@ -221,7 +239,6 @@ fn main()  {
     }
     // end init
 
-    println!("{:?}", &houses[0]);
     while threshold > 0 {
         days += 1;
         threshold -= 1;
@@ -297,7 +314,7 @@ fn main()  {
                     .people_inside
                     .into_iter()
                     .filter_map(|pers| {
-                        let mut ind = -1;
+                        let mut ind: i32 = -1;
                         for house in &houses {
                             ind += 1;
                             if pers.house_id == house.id
