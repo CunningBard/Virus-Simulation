@@ -96,9 +96,11 @@ impl Person
 
     fn handle(&mut self)
     {
-        self.days_since_infected += 1;
-        if self.days_since_infected > self.virus.life_span {
-            self.recover()
+        if self.is_infected {
+            self.days_since_infected += 1;
+            if self.days_since_infected > self.virus.life_span {
+                self.recover()
+            }
         }
     }
 
@@ -175,6 +177,7 @@ impl Building
                 }
             }
         }
+
         for _ in 0..times_to_infect
         {
             self.infect_random(current_virus);

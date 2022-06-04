@@ -1,8 +1,7 @@
 import subprocess
 import matplotlib.pyplot as plt
 
-subprocess.run(["cargo", "run", "--release"])
-subprocess.run(["./target/release/VirusThing", "1000", "40", "14"])
+subprocess.run(["cargo", "run", "--release", "10000", "40", "14"])
 # population, infection(30 is 3%), life span
 
 days = []

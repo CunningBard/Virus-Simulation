@@ -211,8 +211,9 @@ class Person:
             else:
                 self.virusCount += 1
             if (self.virus.recoveryDays // 2) // 2 < self.virusCount:
-                if mymodule.randbool(self.virus.severity):
-                    self.Die()
+                pass
+                # if mymodule.randbool(self.virus.severity):
+                #     self.Die()
             if mymodule.randbool(infectedNum // 10):
                 self.foundInfected = True
 
@@ -278,13 +279,13 @@ def MainThing():
     if infectedNum + recoveredNum > lastThing * int(peopleNum / 2):
         lockdownLevel += 1
         lastThing += 1
-    if int(turn / 30) > monthLast:
-        monthLast += 1
-        for _ in range(int(numOfPeople / 1000)):
-            new_person()
-        if mymodule.divisible_by(monthLast, 2):
-            a = random.choice(list(people))
-            people[a].Die()
+    # if int(turn / 30) > monthLast:
+    #     monthLast += 1
+    #     for _ in range(int(numOfPeople / 1000)):
+    #         new_person()
+    #     if mymodule.divisible_by(monthLast, 2):
+    #         a = random.choice(list(people))
+    #         people[a].Die()
 
 
 def AllFree():
@@ -326,6 +327,9 @@ def show_graph():
 
 
 def create_environment():
+    # for _ in range(numOfPeople//5):
+    #     places.append(Environment(5))
+
     global envi
     for _ in range(environment):
         places.append(Environment(5))
