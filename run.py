@@ -1,9 +1,9 @@
 import subprocess
 import matplotlib.pyplot as plt
 
-
-subprocess.run(["./target/release/VirusThing", "10000", "10", "20"])
-
+subprocess.run(["cargo", "run", "--release"])
+subprocess.run(["./target/release/VirusThing", "1000", "40", "14"])
+# population, infection(30 is 3%), life span
 
 days = []
 population = []
@@ -23,6 +23,19 @@ for line in data:
     healthy.append(int(line[1]))
     infected.append(int(line[2]))
     recovered.append(int(line[3]))
+
+# numbers = []
+# nums = []
+# times = 0
+# for infectedd in infected:
+#     times += 1
+#     nums.append(infectedd)
+#     if times == 3:
+#         times = 0
+#         numbers.append(nums)
+#         nums = []
+#
+# print(numbers)
 
 
 plt.stackplot(days, infected, recovered, healthy, labels=['Infected', 'Recovered', 'Healthy'])

@@ -6,15 +6,20 @@ use std::env;
 use rand::seq::SliceRandom;
 
 
-fn rand_prob(number: i32) -> bool
+fn rand_prob_(number: i32, to: i32) -> bool
 {
-    let num = thread_rng().gen_range(0..100);
+    let num = thread_rng().gen_range(0..to);
     if number > num {
         true
     }
     else {
         false
     }
+}
+
+fn rand_prob(number: i32) -> bool
+{
+    rand_prob_(number, 100)
 }
 fn rand_range(start: i32, stop: i32) -> i32
 {
@@ -148,12 +153,15 @@ impl Building
                 can_be_infected += 1;
             }
         }
-        for person in &mut self.people_inside {
-            if can_be_infected < 1 {
-                break
-            }
+        if can_be_infected < 1 {
+                return;
+        }
 
+        for person in &mut self.people_inside {
             if person.is_infected && !person.is_quarantined {
+                if person.is_recovered {
+                    assert!(false);
+                }
                 current_virus = person.virus.clone();
                 let mut chance = current_virus.infection_chance;
                 while chance > 100 {
@@ -161,7 +169,7 @@ impl Building
                     times_to_infect += 1;
                     person.num_infected_people += 1;
                 }
-                if rand_prob(chance){
+                if rand_prob_(chance, 1000){
                     times_to_infect += 1;
                     person.num_infected_people += 1;
                 }
@@ -212,7 +220,7 @@ fn main()  {
     }
     println!("Population: {}\nVirus: {:?}\n", remain, virus);
 
-    for i in 1..11 {
+    for i in 1..101 {
         malls.push(Building{id: i, capacity: 100, people_inside: vec![]})
     }
 
@@ -280,11 +288,8 @@ fn main()  {
                             pers.handle();
                         }
                         if pers.go_to_mall() {
-                            let mut temp = rand_number_increase_prob(100,20) as usize;
-                            if temp > malls.len(){
-                                temp = malls.len() - 1;
-                            }
-                            malls[temp].people_inside.push(pers);
+                            let mut b = rand_range(0, malls.len() as i32);
+                            malls[b as usize].add(pers);
                             None
                         } else {
                             Some(pers)
@@ -313,14 +318,17 @@ fn main()  {
             }
         }).collect();
     }
+    let mut were_infected = 0;
     let mut num_infected = 0;
     for house in houses.clone() {
         for person in &house.people_inside {
-            if person.is_infected {
-                num_infected += 1;
+            if person.is_recovered && person.num_infected_people > 0 {
+                were_infected += 1;
+                num_infected += person.num_infected_people;
             }
         }
     }
+    println!("{} {}", were_infected, num_infected);
     let mut s = "".to_string();
     for ve in data {
         for v in ve {
